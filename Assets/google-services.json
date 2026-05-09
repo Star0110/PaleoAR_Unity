@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "182937126018",
+    "project_id": "unity-firebase-d5d50",
+    "storage_bucket": "unity-firebase-d5d50.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:182937126018:android:471fba4a4af4f95f29a09b",
+        "android_client_info": {
+          "package_name": "com.stare.appar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8HJHbxiSftNN9YNlj6hL5B-RRVLoBnEg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
