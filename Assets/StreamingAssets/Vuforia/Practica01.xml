@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <QCARConfig>
   <Tracking>
-    <ImageTarget name="oceano_pez" size="5.000000 3.200522" />
-    <ImageTarget name="amancecer" size="5.000000 3.320935" />
-    <ImageTarget name="desierto" size="5.000000 2.736427" />
-    <ImageTarget name="oceano" size="5.000000 3.547106" />
-    <ImageTarget name="bosque" size="5.000000 2.706503" />
-    <ImageTarget name="rocoso" size="5.000000 3.048419" />
+    <ImageTarget name="paisaje3" size="5.000000 3.033764" />
+    <ImageTarget name="paisaje2" size="5.000000 2.932509" />
+    <ImageTarget name="paisaje1" size="5.000000 2.833029" />
+    <ImageTarget name="trex" size="5.000000 3.312500" />
+    <ImageTarget name="velociraptor" size="5.000000 3.672466" />
+    <ImageTarget name="stegosaurus" size="5.000000 3.290094" />
+    <ImageTarget name="pachycephalosaurus2" size="5.000000 2.555556" />
   </Tracking>
 </QCARConfig>
