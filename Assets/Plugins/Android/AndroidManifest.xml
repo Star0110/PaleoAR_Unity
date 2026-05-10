@@ -23,8 +23,8 @@
             <meta-data android:name="android.app.lib_name" android:value="game" />
             <!-- Deep Link desde React Native -->
             <intent-filter>
-                <data android:scheme="examen" android:host="open" />
-                <data android:scheme="examen" android:host="back" />
+                <data android:scheme="paleoar_unity" android:host="open" />
+                <data android:scheme="paleoar_unity" android:host="back" />
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
