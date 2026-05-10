@@ -3,9 +3,12 @@ using UnityEngine.UI;
 using UnityEngine.Video;
 using TMPro;
 using Firebase.Firestore;
+using Firebase.Auth;
 using UnityEngine.Networking;
 using System.Collections;
+using System.Collections.Generic;
 using System;
+using Vuforia;
 
 public class DynamicImageTarget : MonoBehaviour
 {
@@ -24,11 +27,29 @@ public class DynamicImageTarget : MonoBehaviour
     private RenderTexture renderTexture;
 
     FirebaseFirestore db;
+    private bool yaRegistrado = false;
 
-    async void Start()
+    private const string TEST_UID = "6HZCVrR3XjZPP9Cn6NXvtOj3ly43";
+
+    private string GetUID()
+    {
+        var user = FirebaseAuth.DefaultInstance.CurrentUser;
+        return (user != null) ? user.UserId : TEST_UID;
+    }
+
+    void Start()
     {
         db = FirebaseFirestore.DefaultInstance;
-        await CargarDatos();
+
+        var observer = GetComponent<ObserverBehaviour>();
+        if (observer != null)
+            observer.OnTargetStatusChanged += OnTargetStatusChanged;
+    }
+
+    void OnTargetStatusChanged(ObserverBehaviour behaviour, TargetStatus status)
+    {
+        if (status.Status == Status.TRACKED || status.Status == Status.EXTENDED_TRACKED)
+            _ = CargarDatos();
     }
 
     async System.Threading.Tasks.Task CargarDatos()
@@ -71,22 +92,62 @@ public class DynamicImageTarget : MonoBehaviour
                 StartCoroutine(ReproducirVideo(mediaUrl));
             }
         }
+
+        if (!yaRegistrado)
+        {
+            await RegistrarVisita();
+            yaRegistrado = true;
+        }
+    }
+
+    async System.Threading.Tasks.Task RegistrarVisita()
+    {
+        string uid = GetUID();
+
+        try
+        {
+            DocumentReference visitaRef = db
+                .Collection("visitas")
+                .Document(uid)
+                .Collection("registros")
+                .Document(targetName);
+
+            DocumentSnapshot existing = await visitaRef.GetSnapshotAsync();
+
+            if (!existing.Exists)
+            {
+                Dictionary<string, object> visita = new Dictionary<string, object>
+                {
+                    { "uid", uid },
+                    { "targetName", targetName },
+                    { "timestamp", FieldValue.ServerTimestamp }
+                };
+
+                await visitaRef.SetAsync(visita);
+                Debug.Log("[DynamicImageTarget] Visita registrada | UID: " + uid + " | Target: " + targetName);
+            }
+            else
+            {
+                Debug.Log("[DynamicImageTarget] Visita ya existía | UID: " + uid + " | Target: " + targetName);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("[DynamicImageTarget] Error registrando visita: " + e.Message);
+        }
     }
 
     IEnumerator ReproducirVideo(string url)
     {
-        // Liberar RenderTexture anterior si existe
         if (renderTexture != null)
         {
             renderTexture.Release();
             Destroy(renderTexture);
         }
 
-        // Crear nuevo RenderTexture
         renderTexture = new RenderTexture(1280, 720, 16);
         renderTexture.Create();
 
-        // Configurar VideoPlayer ANTES de preparar
         videoPlayer.Stop();
         videoPlayer.source = VideoSource.Url;
         videoPlayer.url = url;
@@ -96,15 +157,12 @@ public class DynamicImageTarget : MonoBehaviour
         videoPlayer.isLooping = true;
         videoPlayer.playOnAwake = false;
 
-        // Mostrar el RenderTexture en la RawImage
         dinoImage.texture = renderTexture;
 
-        // Preparar y esperar con evento
         bool prepared = false;
         videoPlayer.prepareCompleted += (vp) => { prepared = true; };
         videoPlayer.Prepare();
 
-        // Timeout de 10 segundos para no quedar atascado
         float timeout = 10f;
         while (!prepared && timeout > 0)
         {
@@ -124,7 +182,6 @@ public class DynamicImageTarget : MonoBehaviour
 
     IEnumerator DescargarImagen(string url)
     {
-        // Escapar URL por si tiene caracteres especiales
         string urlEscapada = Uri.EscapeUriString(url);
 
         using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(urlEscapada))
@@ -135,7 +192,6 @@ public class DynamicImageTarget : MonoBehaviour
             {
                 Texture2D texture = DownloadHandlerTexture.GetContent(request);
 
-                // Verificar que el objeto sigue activo antes de asignar
                 if (dinoImage != null && dinoImage.gameObject.activeInHierarchy)
                 {
                     dinoImage.texture = texture;
@@ -151,6 +207,10 @@ public class DynamicImageTarget : MonoBehaviour
 
     void OnDestroy()
     {
+        var observer = GetComponent<ObserverBehaviour>();
+        if (observer != null)
+            observer.OnTargetStatusChanged -= OnTargetStatusChanged;
+
         if (renderTexture != null)
         {
             renderTexture.Release();
