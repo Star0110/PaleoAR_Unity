@@ -1,10 +1,11 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using TMPro;
 using Firebase.Firestore;
 using UnityEngine.Networking;
 using System.Collections;
+using System;
 
 public class DynamicImageTarget : MonoBehaviour
 {
@@ -48,16 +49,25 @@ public class DynamicImageTarget : MonoBehaviour
             string tipo = data["tipo"].ToString();
             string mediaUrl = data["mediaURL"].ToString();
 
+            Debug.Log("Tipo: " + tipo + " | URL: " + mediaUrl);
+
             if (tipo == "imagen")
             {
+                // âœ… Solo detener el video, NO desactivar su GameObject
                 videoPlayer.Stop();
-                videoPlayer.gameObject.SetActive(false);
+                videoPlayer.targetTexture = null;
+
+                // âœ… Activar dinoImage y limpiar textura residual
                 dinoImage.gameObject.SetActive(true);
+                dinoImage.texture = null;
+
                 StartCoroutine(DescargarImagen(mediaUrl));
             }
             else if (tipo == "video")
             {
-                // Usar Coroutine para el video, más estable en móvil
+                // âœ… Activar dinoImage antes de la coroutine
+                dinoImage.gameObject.SetActive(true);
+
                 StartCoroutine(ReproducirVideo(mediaUrl));
             }
         }
@@ -89,7 +99,7 @@ public class DynamicImageTarget : MonoBehaviour
         // Mostrar el RenderTexture en la RawImage
         dinoImage.texture = renderTexture;
 
-        // Preparar y esperar con evento (más confiable que isPrepared)
+        // Preparar y esperar con evento
         bool prepared = false;
         videoPlayer.prepareCompleted += (vp) => { prepared = true; };
         videoPlayer.Prepare();
@@ -114,18 +124,27 @@ public class DynamicImageTarget : MonoBehaviour
 
     IEnumerator DescargarImagen(string url)
     {
-        using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
+        // Escapar URL por si tiene caracteres especiales
+        string urlEscapada = Uri.EscapeUriString(url);
+
+        using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(urlEscapada))
         {
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
             {
                 Texture2D texture = DownloadHandlerTexture.GetContent(request);
-                dinoImage.texture = texture;
+
+                // Verificar que el objeto sigue activo antes de asignar
+                if (dinoImage != null && dinoImage.gameObject.activeInHierarchy)
+                {
+                    dinoImage.texture = texture;
+                    Debug.Log("Imagen cargada correctamente: " + url);
+                }
             }
             else
             {
-                Debug.LogError("Error cargando imagen: " + request.error);
+                Debug.LogError("Error cargando imagen: " + request.error + " | URL: " + url);
             }
         }
     }

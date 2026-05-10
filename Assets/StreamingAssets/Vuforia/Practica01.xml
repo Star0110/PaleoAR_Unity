@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <QCARConfig>
   <Tracking>
+    <ImageTarget name="paisaje7" size="5.000000 2.958293" />
+    <ImageTarget name="paisaje4" size="5.000000 2.861751" />
+    <ImageTarget name="paisaje6" size="5.000000 2.757549" />
+    <ImageTarget name="paisaje5" size="5.000000 3.192771" />
     <ImageTarget name="paisaje3" size="5.000000 3.033764" />
     <ImageTarget name="paisaje2" size="5.000000 2.932509" />
     <ImageTarget name="paisaje1" size="5.000000 2.833029" />
-    <ImageTarget name="trex" size="5.000000 3.312500" />
     <ImageTarget name="velociraptor" size="5.000000 3.672466" />
     <ImageTarget name="stegosaurus" size="5.000000 3.290094" />
     <ImageTarget name="pachycephalosaurus2" size="5.000000 2.555556" />
